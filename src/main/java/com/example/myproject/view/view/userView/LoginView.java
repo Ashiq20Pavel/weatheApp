@@ -35,8 +35,9 @@ public class LoginView extends VerticalLayout {
     private PasswordField passwordField;
     private Button loginButton;
 
-    public LoginView(UserInfoService userInfoService) {
+    public LoginView(UserInfoService userInfoService, UserInfoRepository userInfoRepository) {
         this.userInfoService = userInfoService;
+        this.userInfoRepository = userInfoRepository;
         initView();
     }
 
@@ -75,6 +76,7 @@ public class LoginView extends VerticalLayout {
             BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(10, new SecureRandom());
             if (bCryptPasswordEncoder.matches(password, userInfoEntity1.getPassword())) {
                 // Login successful, navigate to the main view
+                UI.getCurrent().getSession().setAttribute("username", username);
                 UI.getCurrent().navigate(MainView.class);
             } else {
                 Notification.show("Invalid username or password");

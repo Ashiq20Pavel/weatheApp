@@ -3,6 +3,7 @@ package com.example.myproject.view.view.userView;
 import com.example.myproject.backend.domain.entity.UserInfoEntity;
 import com.example.myproject.backend.service.UserInfoService;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -74,7 +75,8 @@ class RegistrationView extends VerticalLayout {
 
         userInfoService.addUser(userInfoEntity);
 
-        Notification.show("Registration successful!");
+        Notification.show("Registration successful! Please Login");
+        UI.getCurrent().navigate(LoginView.class);
         clearFields();
     }
 

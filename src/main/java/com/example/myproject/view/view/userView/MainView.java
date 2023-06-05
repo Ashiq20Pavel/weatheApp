@@ -20,11 +20,13 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.server.ThemeResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -70,19 +72,53 @@ public class MainView extends VerticalLayout {
 
 
     public MainView(CityInfoRepository cityInfoRepository) {
-        this.cityInfoRepository = cityInfoRepository;
 
-        initView();
-        populateList();
+        String username = (String) UI.getCurrent().getSession().getAttribute("username");
+        if (username != null) {
+            this.cityInfoRepository = cityInfoRepository;
+            initView(username);
+            populateList();
+        } else {
+            H2 message = new H2();
+            message.getStyle()
+                    .set("text-align", "center")
+                    .set("font-weight", "bold")
+                    .set("text-justify", "inter-word");
+            message.setText("Please log in to access the Main View.");
+
+            RouterLink loginLink = new RouterLink("Login", LoginView.class);
+            loginLink.getStyle().set("text-decoration", "none");
+
+            Div div = new Div();
+            div.getStyle().set("text-align", "justify");
+            div.add(loginLink);
+
+            message.add(div);
+
+            setSizeFull();
+            setJustifyContentMode(JustifyContentMode.CENTER);
+            setAlignItems(Alignment.CENTER);
+
+            Div container = new Div(message);
+            container.getStyle()
+                    .set("display", "flex")
+                    .set("flex-direction", "column")
+                    .set("height", "100%")
+                    .set("justify-content", "center")
+                    .set("align-items", "center");
+
+            add(container);
+        }
+
     }
 
-    private void initView() {
+    private void initView(String username) {
         searchField = new TextField();
         searchField.setPlaceholder("Search...");
         searchButton = new Button("Search", event -> searchUser());
         clearButton = new Button("Clear", event -> clearSearch());
 
-        avatar = new Avatar("User");
+        avatar = new Avatar(username);
         HorizontalLayout avatarLayout = new HorizontalLayout();
         avatarLayout.setJustifyContentMode(JustifyContentMode.END); // Align component to the right
         avatarLayout.add(avatar);
@@ -92,8 +128,11 @@ public class MainView extends VerticalLayout {
         dropdown.setTarget(avatar);
 
         dropdown.addItem("Profile", e -> {
-            /*updateUserInformation();*/ });
-        dropdown.addItem("Logout", e -> { logout(); });
+            /*updateUserInformation();*/
+        });
+        dropdown.addItem("Logout", e -> {
+            logout();
+        });
 
         cityInfoEntityGrid = new Grid<>(CityInfoEntity.class);
 
@@ -239,6 +278,7 @@ public class MainView extends VerticalLayout {
     }
 
     private void logout() {
+        UI.getCurrent().getSession().setAttribute("username", null);
         UI.getCurrent().navigate(LoginView.class);
     }
 }
