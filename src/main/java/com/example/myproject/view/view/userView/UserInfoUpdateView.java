@@ -15,18 +15,14 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Optional;
 
 @Route("updateinfo")
 public class UserInfoUpdateView extends VerticalLayout {
@@ -190,7 +186,6 @@ public class UserInfoUpdateView extends VerticalLayout {
         footer.getStyle().set("margin", "auto");
         footer.getStyle().set("text-align", "center");
 
-        // Add components to the layout
         add(avatarLayout);
         layout.add(header, title, row1Layout, row2Layout, row3Layout, updateButton, dashBoardLink);
         layout.setSizeFull();
@@ -229,10 +224,8 @@ public class UserInfoUpdateView extends VerticalLayout {
         userInfoEntity.setRole(role);
         userInfoEntity.setActive(active);
 
-        // Save the updated employee information
         userInfoService.updateUser(userInfoEntity);
 
-        // Show a success message or navigate to a different view
         Notification.show("Account information updated successfully");
     }
 

@@ -15,9 +15,6 @@ public interface UserFavCityRepository extends JpaRepository<UserFavCityEntity, 
     @Query("select entityInfo from UserFavCityEntity entityInfo where entityInfo.userId = ?1")
     List<UserFavCityEntity> findFavListByuserId(Long userId);
 
-    /*@Query("select entityInfo from UserFavCityEntity entityInfo where entityInfo.userId = ?1 and entityInfo.cityInfo = ?1")
-    UserFavCityEntity findByUserIdAndCityInfo(Long userId, CityInfoEntity cityInfoEntity);*/
-
     UserFavCityEntity findByUserIdAndCityInfo(Long userId, CityInfoEntity cityInfo);
 
 

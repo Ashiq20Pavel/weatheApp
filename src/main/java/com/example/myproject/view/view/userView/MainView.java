@@ -13,18 +13,15 @@ import com.example.myproject.backend.util.WeatherInfoService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,17 +148,15 @@ public class MainView extends VerticalLayout {
         });
 
         cityInfoEntityGrid = new Grid<>(CityInfoEntity.class);
-
-
         cityInfoEntityGrid.setColumns("city", "country");
-
         cityInfoEntityGrid.addComponentColumn(cityInfoEntity -> {
             Div weatherInfoDiv = createWeatherInfo(cityInfoEntity);
             return weatherInfoDiv;
         }).setHeader("Weather Current Info");
 
-        List<UserFavCityEntity> favoriteCities = userFavCityRepository.findFavListByuserId(userInfoEntity.getUserId());
+        /*******location favourite*******/
 
+        List<UserFavCityEntity> favoriteCities = userFavCityRepository.findFavListByuserId(userInfoEntity.getUserId());
         cityInfoEntityGrid.addComponentColumn(city -> {
             Button favoritesButton = new Button();
             favoritesButton.setIcon(city.isFavorite() ? VaadinIcon.HEART.create() : VaadinIcon.HEART_O.create());
@@ -197,9 +192,10 @@ public class MainView extends VerticalLayout {
                     break;
                 }
             }
-
             return favoritesButton;
         }).setHeader("Favorite");
+
+        /*******************************/
 
         cityInfoEntityGrid.addComponentColumn(this::createViewButton).setHeader("Actions");
 
@@ -234,20 +230,6 @@ public class MainView extends VerticalLayout {
         previousButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(cityInfoEntityPage.hasNext());
     }
-
-
-    /*private void populateFavList() {
-        Page<CityInfoEntity> cityInfoEntityPage;
-        if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
-            cityInfoEntityPage = cityInfoRepository.findByCityContainingIgnoreCase(currentSearchQuery, PageRequest.of(currentPage, pageSize));
-        } else {
-            cityInfoEntityPage = cityInfoRepository.findAll(PageRequest.of(currentPage, pageSize));
-        }
-        List<CityInfoEntity> cityInfoEntityList = cityInfoEntityPage.getContent();
-        cityInfoEntityGrid.setItems(cityInfoEntityList);
-        previousButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(cityInfoEntityPage.hasNext());
-    }*/
 
     private Div createWeatherInfo(CityInfoEntity cityInfoEntity) {
         Long cityId = cityInfoEntity.getId();

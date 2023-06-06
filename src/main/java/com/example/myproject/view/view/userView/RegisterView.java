@@ -113,3 +113,4 @@ class RegistrationView extends VerticalLayout {
         passwordField.clear();
     }
 }
+

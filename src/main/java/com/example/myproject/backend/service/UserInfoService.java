@@ -50,40 +50,10 @@ public class UserInfoService {
 
     public UserInfoEntity updateUser(UserInfoEntity userInfoEntity) {
 
-        /*UserInfoEntity userInfoEntity = userInfoRepository.getUserByUsernameToUpdate(userInfoEntity1.getUsername());
-
-        userInfoEntity.setFullName(fullName);
-        userInfoEntity.setEmail(email);
-        userInfoEntity.setDob(dob);*/
         userInfoEntity.setuUsr(userInfoEntity.getUsername());
         userInfoEntity.setuDt(LocalDate.now());
 
         return userInfoRepository.save(userInfoEntity);
 
     }
-
-    public List<UserInfoEntity> getAllUser() {
-        return userInfoRepository.findAll();
-    }
-
-    public Optional<UserInfoEntity> getUser(Long userId) {
-        return userInfoRepository.findById(userId);
-    }
-
-    public void deleteUserById(Long userId) {
-        userInfoRepository.deleteById(userId);
-    }
-
-    /*public UserInfoEntity login(String username, String password) {
-
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(10, new SecureRandom());
-        UserInfoEntity userInfoEntity = userInfoRepository.getUserByUsernameToUpdate(username);
-
-        if (username.equals(userInfoEntity.getUsername()) && bCryptPasswordEncoder.matches(password, userInfoEntity.getPassword())) {
-            return userInfoEntity;
-        } else {
-            return null;
-        }
-
-    }*/
 }

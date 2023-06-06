@@ -1,8 +1,6 @@
 package com.example.myproject.backend.repository;
 
 import com.example.myproject.backend.domain.entity.UserInfoEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -23,5 +21,4 @@ public interface UserInfoRepository extends JpaRepository<UserInfoEntity, Long> 
     @Query("select entityInfo from UserInfoEntity entityInfo where entityInfo.username = ?1 ")
     UserInfoEntity getUserByUsername(String username);
 
-    Page<UserInfoEntity> findByUsernameContainingIgnoreCase(String username, Pageable pageable);
 }

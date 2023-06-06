@@ -2,8 +2,6 @@ package com.example.myproject.backend.domain.dto;
 
 import org.json.JSONArray;
 
-import java.lang.reflect.Array;
-
 public class HourlyWeatherDTO {
 
     private JSONArray time;

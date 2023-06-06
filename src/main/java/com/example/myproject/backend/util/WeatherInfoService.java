@@ -1,22 +1,16 @@
 package com.example.myproject.backend.util;
 
-import com.example.myproject.backend.domain.dto.HourlyWeatherDTO;
 import com.example.myproject.backend.domain.dto.WeatherDTO;
 import com.example.myproject.backend.domain.entity.CityInfoEntity;
-import com.example.myproject.backend.exception.WeatherException;
 import com.example.myproject.backend.repository.CityInfoRepository;
-import elemental.json.JsonObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 @Service
 public class WeatherInfoService {
@@ -38,7 +32,6 @@ public class WeatherInfoService {
 
         String url = API_URL + "?latitude=" + latitude + "&longitude=" + longitude + "&hourly=temperature_2m,rain,windspeed_10m&current_weather=true";
         try {
-            // Make a GET request to the external API
             String response = restTemplate.getForObject(url, String.class);
 
             JSONObject jsonObject = new JSONObject(response);
