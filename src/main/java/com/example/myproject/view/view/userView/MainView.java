@@ -13,6 +13,7 @@ import com.example.myproject.backend.util.WeatherInfoService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
@@ -31,6 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Route("dashboard")
 public class MainView extends VerticalLayout {
@@ -123,8 +125,21 @@ public class MainView extends VerticalLayout {
         searchButton = new Button("Search", event -> searchUser());
         clearButton = new Button("Clear", event -> clearSearch());
 
+        ComboBox<String> filterComboBox = new ComboBox<>("Filter");
+        filterComboBox.setItems("All", "Favorites");
+        filterComboBox.setValue("All");
+        filterComboBox.addValueChangeListener(event -> {
+            String selectedFilter = event.getValue();
+            if (selectedFilter.equals("Favorites")) {
+                populateFavList(username);
+            } else {
+                populateList();
 
-        HorizontalLayout searchLayout = new HorizontalLayout(searchField, searchButton, clearButton);
+            }
+        });
+
+
+        HorizontalLayout searchLayout = new HorizontalLayout(filterComboBox, searchField, searchButton, clearButton);
         searchLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
         searchLayout.setWidthFull();
         searchLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
@@ -229,6 +244,35 @@ public class MainView extends VerticalLayout {
         cityInfoEntityGrid.setItems(cityInfoEntityList);
         previousButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(cityInfoEntityPage.hasNext());
+    }
+
+    private void populateFavList(String username) {
+        UserInfoEntity userInfoEntity = userInfoRepository.getUserByUsername(username);
+
+        Page<CityInfoEntity> cityInfoEntityPage;
+        if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
+            cityInfoEntityPage = cityInfoRepository.findByCityContainingIgnoreCase(currentSearchQuery, PageRequest.of(currentPage, pageSize));
+        } else {
+            cityInfoEntityPage = cityInfoRepository.findAll(PageRequest.of(currentPage, pageSize));
+        }
+
+        List<UserFavCityEntity> favoriteCities = userFavCityRepository.findFavListByuserId(userInfoEntity.getUserId());
+
+        List<CityInfoEntity> filteredList = cityInfoEntityPage.getContent().stream()
+                .filter(cityInfoEntity -> {
+                    for (UserFavCityEntity favoriteCity : favoriteCities) {
+                        if (favoriteCity.getCityInfo().getId().equals(cityInfoEntity.getId())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
+
+        cityInfoEntityGrid.setItems(filteredList);
+        previousButton.setEnabled(currentPage > 0);
+        nextButton.setEnabled(cityInfoEntityPage.hasNext() && filteredList.size() == pageSize);
+//        nextButton.setEnabled(cityInfoEntityPage.hasNext());
     }
 
     private Div createWeatherInfo(CityInfoEntity cityInfoEntity) {

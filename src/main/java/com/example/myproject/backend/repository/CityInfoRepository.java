@@ -15,4 +15,6 @@ public interface CityInfoRepository extends JpaRepository<CityInfoEntity, Long> 
 
     Page<CityInfoEntity> findByCityContainingIgnoreCase(String city, Pageable pageable);
 
+    Page<CityInfoEntity> findByIsFavorite(boolean isFavorite, Pageable pageable);
+
 }
