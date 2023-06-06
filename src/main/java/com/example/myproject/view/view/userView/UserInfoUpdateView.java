@@ -147,6 +147,9 @@ public class UserInfoUpdateView extends VerticalLayout {
         String formattedDob = storedDob.format(outputFormatter);
 
         birthDateField = new DatePicker("Date of Birth");
+        Div formatMessage = new Div();
+        formatMessage.setText("Format: mm/dd/yyyy");
+        formatMessage.getStyle().set("color", "gray");
         birthDateField.setValue(LocalDate.parse(formattedDob, outputFormatter));
 
         HorizontalLayout row3Layout = new HorizontalLayout(birthDateField);
@@ -187,7 +190,7 @@ public class UserInfoUpdateView extends VerticalLayout {
         footer.getStyle().set("text-align", "center");
 
         add(avatarLayout);
-        layout.add(header, title, row1Layout, row2Layout, row3Layout, updateButton, dashBoardLink);
+        layout.add(header, title, row1Layout, row2Layout, row3Layout, formatMessage, updateButton, dashBoardLink);
         layout.setSizeFull();
         add(layout);
         add(footer);
@@ -196,7 +199,6 @@ public class UserInfoUpdateView extends VerticalLayout {
     private void updateEmployeeInfo(ClickEvent<Button> event) {
         UserInfoEntity userInfoEntity = new UserInfoEntity();
 
-        // Get the updated values from the form fields
         Long userId = Long.valueOf(userIdField.getValue());
         String username = usernameField.getValue();
         String firstName = fullNameField.getValue();
@@ -208,7 +210,6 @@ public class UserInfoUpdateView extends VerticalLayout {
         String role = roleField.getValue();
         String active = activeField.getValue();
 
-        // Update the employee information
         userInfoEntity.setUserId(userId);
         userInfoEntity.setUsername(username);
         userInfoEntity.setFullName(firstName);
