@@ -227,7 +227,7 @@ public class UserInfoUpdateView extends VerticalLayout {
         userInfoEntity.setiUsr(iUsr);
         userInfoEntity.setiDt(LocalDate.parse(iDt));
         userInfoEntity.setRole(role);
-        userInfoEntity.setRole(active);
+        userInfoEntity.setActive(active);
 
         // Save the updated employee information
         userInfoService.updateUser(userInfoEntity);

@@ -2,8 +2,10 @@ package com.example.myproject.view.view.userView;
 
 import com.example.myproject.backend.domain.dto.WeatherDTO;
 import com.example.myproject.backend.domain.entity.CityInfoEntity;
+import com.example.myproject.backend.domain.entity.UserFavCityEntity;
 import com.example.myproject.backend.domain.entity.UserInfoEntity;
 import com.example.myproject.backend.repository.CityInfoRepository;
+import com.example.myproject.backend.repository.UserFavCityRepository;
 import com.example.myproject.backend.repository.UserInfoRepository;
 import com.example.myproject.backend.repository.WeatherServiceRepository;
 import com.example.myproject.backend.service.CityService;
@@ -16,6 +18,8 @@ import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -27,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +53,9 @@ public class MainView extends VerticalLayout {
     @Autowired
     UserInfoRepository userInfoRepository;
 
+    @Autowired
+    UserFavCityRepository userFavCityRepository;
+
     private Grid<CityInfoEntity> cityInfoEntityGrid;
 
     private TextField searchField;
@@ -66,12 +74,13 @@ public class MainView extends VerticalLayout {
     private ContextMenu dropdown;
 
 
-    public MainView(CityInfoRepository cityInfoRepository, UserInfoRepository userInfoRepository) {
+    public MainView(CityInfoRepository cityInfoRepository, UserInfoRepository userInfoRepository, UserFavCityRepository userFavCityRepository) {
 
         String username = (String) UI.getCurrent().getSession().getAttribute("username");
         if (username != null) {
             this.cityInfoRepository = cityInfoRepository;
             this.userInfoRepository = userInfoRepository;
+            this.userFavCityRepository = userFavCityRepository;
             initView(username);
             populateList();
         } else {
@@ -162,23 +171,44 @@ public class MainView extends VerticalLayout {
             return loveButton;
         }).setHeader("Favorite");
         favoriteColumn.setWidth("100px");*/
+        List<UserFavCityEntity> favoriteCities = userFavCityRepository.findFavListByuserId(userInfoEntity.getUserId());
 
-        Grid.Column<CityInfoEntity> favoriteColumn = cityInfoEntityGrid.addColumn(new ComponentRenderer<>(cityInfoEntity -> {
-            Checkbox favoriteCheckbox = new Checkbox();
-            favoriteCheckbox.setValue(cityInfoEntity.isFavorite());
-            favoriteCheckbox.addValueChangeListener(event -> {
-                // Handle checkbox value change event
-                boolean newValue = event.getValue();
-                // Update the cityInfoEntity with the new favorite value
-                cityInfoEntity.setFavorite(newValue);
-                // Save or update the cityInfoEntity in the repository or service
-                // ...
+        cityInfoEntityGrid.addComponentColumn(city -> {
+            Button favoritesButton = new Button();
+            favoritesButton.setIcon(city.isFavorite() ? VaadinIcon.HEART.create() : VaadinIcon.HEART_O.create());
+            favoritesButton.addClickListener(event -> {
+                city.setFavorite(!city.isFavorite());
+                favoritesButton.setIcon(city.isFavorite() ? VaadinIcon.HEART.create() : VaadinIcon.HEART_O.create());
+
+                if (city.isFavorite()) {
+                    UserFavCityEntity userFavCity = new UserFavCityEntity();
+
+                    Long maxId = userFavCityRepository.findMaxUserFavCityId();
+                    if (maxId == null) {
+                        userFavCity.setUserFavCityId(1L);
+                    } else userFavCity.setUserFavCityId(maxId + 1);
+
+                    userFavCity.setUserId(userInfoEntity.getUserId());
+                    userFavCity.setiUsr(username);
+                    userFavCity.setiDt(LocalDate.now());
+                    userFavCity.setCityInfo(city);
+
+                    userFavCityRepository.save(userFavCity);
+                    // Save the UserFavCityEntity entry to the database
+                } else {
+                    // Delete the UserFavCityEntity entry for the user and city from the database
+                }
             });
-            return favoriteCheckbox;
-        })).setHeader("Favorite");
+            for (UserFavCityEntity favoriteCity : favoriteCities) {
+                if (favoriteCity.getCityInfo().getId().equals(city.getId())) {
+                    city.setFavorite(true);
+                    favoritesButton.setIcon(VaadinIcon.HEART.create());
+                    break;
+                }
+            }
 
-// Set the width of the "Favorite" column
-        favoriteColumn.setWidth("100px");
+            return favoritesButton;
+        }).setHeader("Favorite");
 
         cityInfoEntityGrid.addComponentColumn(this::createViewButton).setHeader("Actions");
 
@@ -214,7 +244,8 @@ public class MainView extends VerticalLayout {
         nextButton.setEnabled(cityInfoEntityPage.hasNext());
     }
 
-    private void populateFavList() {
+
+    /*private void populateFavList() {
         Page<CityInfoEntity> cityInfoEntityPage;
         if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
             cityInfoEntityPage = cityInfoRepository.findByCityContainingIgnoreCase(currentSearchQuery, PageRequest.of(currentPage, pageSize));
@@ -225,7 +256,7 @@ public class MainView extends VerticalLayout {
         cityInfoEntityGrid.setItems(cityInfoEntityList);
         previousButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(cityInfoEntityPage.hasNext());
-    }
+    }*/
 
     private Div createWeatherInfo(CityInfoEntity cityInfoEntity) {
         Long cityId = cityInfoEntity.getId();

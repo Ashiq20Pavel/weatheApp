@@ -13,23 +13,15 @@ public class UserFavCityEntity {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "city_id")
-    private Long cityId;
+    @ManyToOne()
+    @JoinColumn(name = "city_id")
+    private CityInfoEntity cityInfo;
 
     @Column(name = "i_usr")
     private String iUsr;
 
     @Column(name = "i_dt")
     private LocalDate iDt;
-
-    @Column(name = "u_usr")
-    private String uUsr;
-
-    @Column(name = "u_dt")
-    private LocalDate uDt;
-
-    @Column(name = "active")
-    private String active;
 
     public Long getUserFavCityId() {
         return userFavCityId;
@@ -47,12 +39,12 @@ public class UserFavCityEntity {
         this.userId = userId;
     }
 
-    public Long getCityId() {
-        return cityId;
+    public CityInfoEntity getCityInfo() {
+        return cityInfo;
     }
 
-    public void setCityId(Long cityId) {
-        this.cityId = cityId;
+    public void setCityInfo(CityInfoEntity cityInfo) {
+        this.cityInfo = cityInfo;
     }
 
     public String getiUsr() {
@@ -71,27 +63,4 @@ public class UserFavCityEntity {
         this.iDt = iDt;
     }
 
-    public String getuUsr() {
-        return uUsr;
-    }
-
-    public void setuUsr(String uUsr) {
-        this.uUsr = uUsr;
-    }
-
-    public LocalDate getuDt() {
-        return uDt;
-    }
-
-    public void setuDt(LocalDate uDt) {
-        this.uDt = uDt;
-    }
-
-    public String getActive() {
-        return active;
-    }
-
-    public void setActive(String active) {
-        this.active = active;
-    }
 }
