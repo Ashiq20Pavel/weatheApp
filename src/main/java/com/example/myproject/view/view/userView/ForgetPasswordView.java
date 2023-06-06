@@ -23,7 +23,7 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 
 @Route("forgotPass")
-public class ForgetPasswordView extends Div {
+public class ForgetPasswordView extends VerticalLayout {
 
     @Autowired
     UserInfoRepository userInfoRepository;
@@ -32,7 +32,47 @@ public class ForgetPasswordView extends Div {
     private PasswordField passwordField;
     private Button resetButton;
 
-    public ForgetPasswordView() {
+    public ForgetPasswordView(UserInfoRepository userInfoRepository){
+        String username = (String) UI.getCurrent().getSession().getAttribute("username");
+
+        if (username == null) {
+            this.userInfoRepository = userInfoRepository;
+            initView();
+        } else {
+            H2 message = new H2();
+            message.getStyle()
+                    .set("text-align", "center")
+                    .set("font-weight", "bold")
+                    .set("text-justify", "inter-word");
+            message.setText("You are not permitted to access this page as a logged in user!");
+
+            RouterLink dashBoardLink = new RouterLink("Home", MainView.class);
+            dashBoardLink.getStyle().set("text-decoration", "none");
+
+            Div div = new Div();
+            div.getStyle().set("text-align", "justify");
+            div.add(dashBoardLink);
+
+            message.add(div);
+
+            setSizeFull();
+            setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+            setAlignItems(FlexComponent.Alignment.CENTER);
+
+            Div container = new Div(message);
+            container.getStyle()
+                    .set("display", "flex")
+                    .set("flex-direction", "column")
+                    .set("height", "100%")
+                    .set("justify-content", "center")
+                    .set("align-items", "center");
+
+            add(container);
+        }
+    }
+
+
+    private void initView() {
         Header header = new Header(new H2("Weather Application"));
         H3 title = new H3("Forget Password");
 

@@ -210,7 +210,7 @@ public class MainView extends VerticalLayout {
             return favoritesButton;
         }).setHeader("Favorite");
 
-        /*******************************/
+        /**************end location favourite*****************/
 
         cityInfoEntityGrid.addComponentColumn(this::createViewButton).setHeader("Actions");
 
@@ -243,7 +243,7 @@ public class MainView extends VerticalLayout {
         List<CityInfoEntity> cityInfoEntityList = cityInfoEntityPage.getContent();
         cityInfoEntityGrid.setItems(cityInfoEntityList);
         previousButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(cityInfoEntityPage.hasNext());
+        nextButton.setEnabled(cityInfoEntityPage.hasNext() && cityInfoEntityList.size() == pageSize);
     }
 
     private void populateFavList(String username) {

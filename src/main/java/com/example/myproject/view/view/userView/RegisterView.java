@@ -36,8 +36,42 @@ class RegistrationView extends VerticalLayout {
     private PasswordField passwordField;
 
     public RegistrationView(UserInfoService userInfoService) {
-        this.userInfoService = userInfoService;
-        initView();
+
+        String username = (String) UI.getCurrent().getSession().getAttribute("username");
+        if (username == null) {
+            this.userInfoService = userInfoService;
+            initView();
+        } else {
+            H2 message = new H2();
+            message.getStyle()
+                    .set("text-align", "center")
+                    .set("font-weight", "bold")
+                    .set("text-justify", "inter-word");
+            message.setText("You are already logged in as a registered user!");
+
+            RouterLink dashBoardLink = new RouterLink("Home", MainView.class);
+            dashBoardLink.getStyle().set("text-decoration", "none");
+
+            Div div = new Div();
+            div.getStyle().set("text-align", "justify");
+            div.add(dashBoardLink);
+
+            message.add(div);
+
+            setSizeFull();
+            setJustifyContentMode(JustifyContentMode.CENTER);
+            setAlignItems(Alignment.CENTER);
+
+            Div container = new Div(message);
+            container.getStyle()
+                    .set("display", "flex")
+                    .set("flex-direction", "column")
+                    .set("height", "100%")
+                    .set("justify-content", "center")
+                    .set("align-items", "center");
+
+            add(container);
+        }
     }
 
     private void initView() {
