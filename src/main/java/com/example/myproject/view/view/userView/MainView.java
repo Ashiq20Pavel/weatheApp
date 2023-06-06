@@ -160,17 +160,6 @@ public class MainView extends VerticalLayout {
             return weatherInfoDiv;
         }).setHeader("Weather Current Info");
 
-        /*Grid.Column<CityInfoEntity> favoriteColumn = cityInfoEntityGrid.addComponentColumn(cityInfoEntity -> {
-            Button loveButton = new Button();
-            loveButton.setIcon(new Icon(VaadinIcon.HEART));
-            loveButton.addClickListener(event -> {
-                // Handle love button click event
-                // Access the clicked cityInfoEntity using "cityInfoEntity" parameter
-                // ...
-            });
-            return loveButton;
-        }).setHeader("Favorite");
-        favoriteColumn.setWidth("100px");*/
         List<UserFavCityEntity> favoriteCities = userFavCityRepository.findFavListByuserId(userInfoEntity.getUserId());
 
         cityInfoEntityGrid.addComponentColumn(city -> {
@@ -194,9 +183,11 @@ public class MainView extends VerticalLayout {
                     userFavCity.setCityInfo(city);
 
                     userFavCityRepository.save(userFavCity);
-                    // Save the UserFavCityEntity entry to the database
                 } else {
-                    // Delete the UserFavCityEntity entry for the user and city from the database
+                    UserFavCityEntity userFavCity = userFavCityRepository.findByUserIdAndCityInfo(userInfoEntity.getUserId(), city);
+                    if (userFavCity != null) {
+                        userFavCityRepository.delete(userFavCity);
+                    }
                 }
             });
             for (UserFavCityEntity favoriteCity : favoriteCities) {
