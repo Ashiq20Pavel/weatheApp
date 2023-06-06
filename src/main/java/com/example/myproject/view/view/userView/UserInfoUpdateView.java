@@ -24,6 +24,7 @@ import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
 
@@ -39,7 +40,7 @@ public class UserInfoUpdateView extends VerticalLayout {
     private TextField userIdField;
     private TextField fullNameField;
     private EmailField emailField;
-    private TextField birthDateField;
+    private DatePicker birthDateField;
     private TextField usernameField;
     private PasswordField passwordField;
     private TextField iUsrField;
@@ -143,8 +144,14 @@ public class UserInfoUpdateView extends VerticalLayout {
         row1Layout.setWidthFull();
         row1Layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
-        birthDateField = new TextField("Date of Birth");
-        birthDateField.setValue(userInfoEntity.getDob());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate storedDob = LocalDate.parse(userInfoEntity.getDob(), formatter);
+
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        String formattedDob = storedDob.format(outputFormatter);
+
+        birthDateField = new DatePicker("Date of Birth");
+        birthDateField.setValue(LocalDate.parse(formattedDob, outputFormatter));
 
         HorizontalLayout row3Layout = new HorizontalLayout(birthDateField);
         row1Layout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
@@ -199,7 +206,7 @@ public class UserInfoUpdateView extends VerticalLayout {
         String username = usernameField.getValue();
         String firstName = fullNameField.getValue();
         String lastName = emailField.getValue();
-        String birthDate = birthDateField.getValue();
+        LocalDate birthDate = birthDateField.getValue();
         String password = passwordField.getValue();
         String iUsr = iUsrField.getValue();
         String iDt = iDtField.getValue();
@@ -211,7 +218,11 @@ public class UserInfoUpdateView extends VerticalLayout {
         userInfoEntity.setUsername(username);
         userInfoEntity.setFullName(firstName);
         userInfoEntity.setEmail(lastName);
-        userInfoEntity.setDob(birthDate);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String dob = birthDate.format(formatter);
+        userInfoEntity.setDob(dob);
+
         userInfoEntity.setPassword(password);
         userInfoEntity.setiUsr(iUsr);
         userInfoEntity.setiDt(LocalDate.parse(iDt));
@@ -222,7 +233,7 @@ public class UserInfoUpdateView extends VerticalLayout {
         userInfoService.updateUser(userInfoEntity);
 
         // Show a success message or navigate to a different view
-        Notification.show("Employee information updated successfully");
+        Notification.show("Account information updated successfully");
     }
 
     private void home() {

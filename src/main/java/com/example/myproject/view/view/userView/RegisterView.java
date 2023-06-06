@@ -96,8 +96,8 @@ class RegistrationView extends VerticalLayout {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String dob = dobField.getValue().format(formatter);
-
         userInfoEntity.setDob(dob);
+
         userInfoEntity.setUsername(usernameField.getValue());
         userInfoEntity.setPassword(passwordField.getValue());
 
