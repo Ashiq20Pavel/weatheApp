@@ -17,6 +17,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+@PageTitle("Account Information")
 @Route("updateinfo")
 public class UserInfoUpdateView extends VerticalLayout {
 
@@ -94,7 +96,7 @@ public class UserInfoUpdateView extends VerticalLayout {
 
         UserInfoEntity userInfoEntity = userInfoRepository.getUserByUsername(username);
 
-        avatar = new Avatar(username);
+        avatar = new Avatar(username.toUpperCase());
         HorizontalLayout avatarLayout = new HorizontalLayout(avatar);
         avatarLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
         avatarLayout.setWidthFull();
@@ -105,6 +107,7 @@ public class UserInfoUpdateView extends VerticalLayout {
         dropdown.setOpenOnClick(true);
         dropdown.setTarget(avatar);
 
+        dropdown.addItem("Username: " + username).setEnabled(false);
         dropdown.addItem("Home", e -> {
             home();
         });
@@ -227,7 +230,7 @@ public class UserInfoUpdateView extends VerticalLayout {
 
         userInfoService.updateUser(userInfoEntity);
 
-        Notification.show("Account information updated successfully");
+        Notification.show("Account information updated successfully").setPosition(Notification.Position.TOP_CENTER);
     }
 
     private void home() {

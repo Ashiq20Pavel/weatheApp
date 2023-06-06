@@ -14,6 +14,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 
+@PageTitle("Forget Password")
 @Route("forgotPass")
 public class ForgetPasswordView extends VerticalLayout {
 
@@ -112,10 +114,10 @@ public class ForgetPasswordView extends VerticalLayout {
             userInfoEntity.setuDt(LocalDate.now());
             userInfoRepository.save(userInfoEntity);
 
-            Notification.show("Password has been reset!");
+            Notification.show("Password has been reset!").setPosition(Notification.Position.TOP_CENTER);
             UI.getCurrent().navigate(LoginView.class);
         } else {
-            Notification.show("Username not found. Please check your input.");
+            Notification.show("Username not found. Please check your input.").setPosition(Notification.Position.TOP_CENTER);
         }
     }
 

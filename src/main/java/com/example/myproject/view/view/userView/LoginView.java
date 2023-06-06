@@ -14,6 +14,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.security.SecureRandom;
 import java.util.Optional;
 
+@PageTitle("Login")
 @Route("login")
 public class LoginView extends VerticalLayout {
 
@@ -80,10 +82,10 @@ public class LoginView extends VerticalLayout {
                 UI.getCurrent().getSession().setAttribute("username", username);
                 UI.getCurrent().navigate(MainView.class);
             } else {
-                Notification.show("Invalid username or password");
+                Notification.show("Invalid username or password").setPosition(Notification.Position.TOP_CENTER);
             }
         } else {
-            Notification.show("Invalid username or password");
+            Notification.show("Invalid username or password").setPosition(Notification.Position.TOP_CENTER);
         }
         clearFields();
     }

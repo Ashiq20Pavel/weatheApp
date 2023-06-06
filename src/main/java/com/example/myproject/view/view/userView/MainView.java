@@ -23,6 +23,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@PageTitle("Home")
 @Route("dashboard")
 public class MainView extends VerticalLayout {
 
@@ -144,7 +146,7 @@ public class MainView extends VerticalLayout {
         searchLayout.setWidthFull();
         searchLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
-        avatar = new Avatar(username);
+        avatar = new Avatar(username.toUpperCase());
         HorizontalLayout avatarLayout = new HorizontalLayout(avatar);
         avatarLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
         avatarLayout.setWidthFull();
@@ -155,6 +157,7 @@ public class MainView extends VerticalLayout {
         dropdown.setOpenOnClick(true);
         dropdown.setTarget(avatar);
 
+        dropdown.addItem("Username: " + username).setEnabled(false);
         dropdown.addItem("Profile", e -> {
             updateUserInformation();
         });

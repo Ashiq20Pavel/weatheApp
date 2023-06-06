@@ -17,12 +17,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.format.DateTimeFormatter;
 
+@PageTitle("Registration")
 @Route("register")
 class RegistrationView extends VerticalLayout {
 
@@ -137,7 +139,7 @@ class RegistrationView extends VerticalLayout {
 
         userInfoService.addUser(userInfoEntity);
 
-        Notification.show("Registration successful! Please Login");
+        Notification.show("Registration successful! Please Login").setPosition(Notification.Position.TOP_CENTER);
         UI.getCurrent().navigate(LoginView.class);
         clearFields();
     }
