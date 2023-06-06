@@ -27,6 +27,9 @@ public class CityInfoEntity {
     @Transient
     private JSONObject weatherDTO;
 
+    @Transient
+    private boolean isFavorite;
+
     public Long getId() {
         return id;
     }
@@ -74,5 +77,13 @@ public class CityInfoEntity {
     public String setWeatherDTO(JSONObject weatherDTO) {
         this.weatherDTO = weatherDTO;
         return null;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 }

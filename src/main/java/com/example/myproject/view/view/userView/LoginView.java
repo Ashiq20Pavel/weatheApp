@@ -73,9 +73,10 @@ public class LoginView extends VerticalLayout {
         Optional<UserInfoEntity> userInfoEntity = userInfoRepository.getUserByUsernameLogin(username);
         if (userInfoEntity.isPresent()) {
             UserInfoEntity userInfoEntity1 = userInfoEntity.get();
+
             BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(10, new SecureRandom());
+
             if (bCryptPasswordEncoder.matches(password, userInfoEntity1.getPassword())) {
-                // Login successful, navigate to the main view
                 UI.getCurrent().getSession().setAttribute("username", username);
                 UI.getCurrent().navigate(MainView.class);
             } else {

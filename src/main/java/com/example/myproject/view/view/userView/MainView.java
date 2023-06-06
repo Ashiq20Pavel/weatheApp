@@ -8,26 +8,21 @@ import com.example.myproject.backend.repository.UserInfoRepository;
 import com.example.myproject.backend.repository.WeatherServiceRepository;
 import com.example.myproject.backend.service.CityService;
 import com.example.myproject.backend.util.WeatherInfoService;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
-import com.vaadin.flow.component.contextmenu.GeneratedVaadinContextMenu;
-import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.server.ThemeResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -71,11 +66,12 @@ public class MainView extends VerticalLayout {
     private ContextMenu dropdown;
 
 
-    public MainView(CityInfoRepository cityInfoRepository) {
+    public MainView(CityInfoRepository cityInfoRepository, UserInfoRepository userInfoRepository) {
 
         String username = (String) UI.getCurrent().getSession().getAttribute("username");
         if (username != null) {
             this.cityInfoRepository = cityInfoRepository;
+            this.userInfoRepository = userInfoRepository;
             initView(username);
             populateList();
         } else {
@@ -113,22 +109,33 @@ public class MainView extends VerticalLayout {
     }
 
     private void initView(String username) {
+
+        UserInfoEntity userInfoEntity = userInfoRepository.getUserByUsername(username);
+
         searchField = new TextField();
         searchField.setPlaceholder("Search...");
         searchButton = new Button("Search", event -> searchUser());
         clearButton = new Button("Clear", event -> clearSearch());
 
+
+        HorizontalLayout searchLayout = new HorizontalLayout(searchField, searchButton, clearButton);
+        searchLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
+        searchLayout.setWidthFull();
+        searchLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+
         avatar = new Avatar(username);
-        HorizontalLayout avatarLayout = new HorizontalLayout();
-        avatarLayout.setJustifyContentMode(JustifyContentMode.END); // Align component to the right
-        avatarLayout.add(avatar);
+        HorizontalLayout avatarLayout = new HorizontalLayout(avatar);
+        avatarLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
+        avatarLayout.setWidthFull();
+        avatarLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        avatarLayout.add(new Label("Hi! " + userInfoEntity.getFullName()), avatar);
 
         dropdown = new ContextMenu();
         dropdown.setOpenOnClick(true);
         dropdown.setTarget(avatar);
 
         dropdown.addItem("Profile", e -> {
-            /*updateUserInformation();*/
+            updateUserInformation();
         });
         dropdown.addItem("Logout", e -> {
             logout();
@@ -136,12 +143,42 @@ public class MainView extends VerticalLayout {
 
         cityInfoEntityGrid = new Grid<>(CityInfoEntity.class);
 
+
         cityInfoEntityGrid.setColumns("city", "country");
 
         cityInfoEntityGrid.addComponentColumn(cityInfoEntity -> {
             Div weatherInfoDiv = createWeatherInfo(cityInfoEntity);
             return weatherInfoDiv;
         }).setHeader("Weather Current Info");
+
+        /*Grid.Column<CityInfoEntity> favoriteColumn = cityInfoEntityGrid.addComponentColumn(cityInfoEntity -> {
+            Button loveButton = new Button();
+            loveButton.setIcon(new Icon(VaadinIcon.HEART));
+            loveButton.addClickListener(event -> {
+                // Handle love button click event
+                // Access the clicked cityInfoEntity using "cityInfoEntity" parameter
+                // ...
+            });
+            return loveButton;
+        }).setHeader("Favorite");
+        favoriteColumn.setWidth("100px");*/
+
+        Grid.Column<CityInfoEntity> favoriteColumn = cityInfoEntityGrid.addColumn(new ComponentRenderer<>(cityInfoEntity -> {
+            Checkbox favoriteCheckbox = new Checkbox();
+            favoriteCheckbox.setValue(cityInfoEntity.isFavorite());
+            favoriteCheckbox.addValueChangeListener(event -> {
+                // Handle checkbox value change event
+                boolean newValue = event.getValue();
+                // Update the cityInfoEntity with the new favorite value
+                cityInfoEntity.setFavorite(newValue);
+                // Save or update the cityInfoEntity in the repository or service
+                // ...
+            });
+            return favoriteCheckbox;
+        })).setHeader("Favorite");
+
+// Set the width of the "Favorite" column
+        favoriteColumn.setWidth("100px");
 
         cityInfoEntityGrid.addComponentColumn(this::createViewButton).setHeader("Actions");
 
@@ -156,16 +193,28 @@ public class MainView extends VerticalLayout {
         buttonLayout.setWidthFull();
         buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
-
         Div footer = new Div();
         footer.setText("Developed By Md. Ashiqur Rahman");
         footer.getStyle().set("margin", "auto");
         footer.getStyle().set("text-align", "center");
 
-        add(new HorizontalLayout(avatarLayout, searchField, searchButton, clearButton), cityInfoEntityGrid, buttonLayout, footer);
+        add(avatarLayout, searchLayout, cityInfoEntityGrid, buttonLayout, footer);
     }
 
     private void populateList() {
+        Page<CityInfoEntity> cityInfoEntityPage;
+        if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
+            cityInfoEntityPage = cityInfoRepository.findByCityContainingIgnoreCase(currentSearchQuery, PageRequest.of(currentPage, pageSize));
+        } else {
+            cityInfoEntityPage = cityInfoRepository.findAll(PageRequest.of(currentPage, pageSize));
+        }
+        List<CityInfoEntity> cityInfoEntityList = cityInfoEntityPage.getContent();
+        cityInfoEntityGrid.setItems(cityInfoEntityList);
+        previousButton.setEnabled(currentPage > 0);
+        nextButton.setEnabled(cityInfoEntityPage.hasNext());
+    }
+
+    private void populateFavList() {
         Page<CityInfoEntity> cityInfoEntityPage;
         if (currentSearchQuery != null && !currentSearchQuery.isEmpty()) {
             cityInfoEntityPage = cityInfoRepository.findByCityContainingIgnoreCase(currentSearchQuery, PageRequest.of(currentPage, pageSize));
@@ -184,16 +233,6 @@ public class MainView extends VerticalLayout {
 
         Div weatherInfoDiv = new Div();
         weatherInfoDiv.setClassName("weather-info");
-
-        /*if (weather != null) {
-            String weatherStatus = weatherServiceRepository.findDesByCode(weather.getWeatherStatus());
-            String weatherInfo = "Temperature: " + weather.getTemperature() + "°C" + "<br>"
-                    + "Wind Speed: " + weather.getWindSpeed() + "km/h" + "<br>"
-                    + "Weather Status: " + weatherStatus;
-            weatherInfoDiv.getElement().setProperty("innerHTML", weatherInfo);
-        } else {
-            weatherInfoDiv.setText("No weather information");
-        }*/
 
         if (weather != null) {
             String weatherStatus = weatherServiceRepository.findDesByCode(weather.getWeatherStatus());
