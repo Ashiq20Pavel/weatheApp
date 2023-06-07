@@ -13,11 +13,14 @@ import com.example.myproject.backend.util.WeatherInfoService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -215,7 +218,8 @@ public class MainView extends VerticalLayout {
 
         /**************end location favourite*****************/
 
-        cityInfoEntityGrid.addComponentColumn(this::createViewButton).setHeader("Actions");
+        cityInfoEntityGrid.addComponentColumn(this::createViewButton).setHeader("Hourly Info");
+        cityInfoEntityGrid.addComponentColumn(this::createGraphViewButton).setHeader("Hourly Graph");
 
         cityInfoEntityGrid.setPageSize(10);
         cityInfoEntityGrid.setHeight("550px");
@@ -360,6 +364,74 @@ public class MainView extends VerticalLayout {
             layout.add(grid);
         } else {
             layout.add("No weather information");
+        }
+    }
+
+    private Button createGraphViewButton(CityInfoEntity cityInfoEntity) {
+        Button graphViewButton = new Button("View Hourly Graph");
+        graphViewButton.addClickListener(e -> {
+            showGraphDetails(cityInfoEntity);
+        });
+        return graphViewButton;
+    }
+
+    private void showGraphDetails(CityInfoEntity cityInfoEntity) {
+        Dialog dialog = new Dialog();
+        dialog.setWidth("1000px");
+        dialog.setHeight("800px");
+        dialog.setCloseOnOutsideClick(true);
+
+        VerticalLayout content = new VerticalLayout();
+        content.setPadding(true);
+        content.add(
+                new H2("City Hourly Weather Chart"),
+                new Paragraph("City: " + cityInfoEntity.getCity() + "   Country: " + cityInfoEntity.getCountry()),
+                //new Paragraph("Country: " + cityInfoEntity.getCountry()),
+                new Paragraph("Latitude: " + cityInfoEntity.getLat() + "   Longitude: " + cityInfoEntity.getLng())
+//                new Paragraph("Longitude: " + cityInfoEntity.getLng())
+        );
+        content.add(new H3("Hourly Weather"));
+        content.add(new H5("Units => Time Zone: GMT, Temperature: °C"));
+        createGraphWeatherInfoHourly(cityInfoEntity, content);
+        dialog.add(content);
+        dialog.open();
+    }
+
+    private void createGraphWeatherInfoHourly(CityInfoEntity cityInfoEntity, VerticalLayout layout) {
+        Long cityId = cityInfoEntity.getId();
+        ArrayList<WeatherDTO> weather = weatherInfoService.getWeatherHourlyByCity(cityId);
+
+        if (weather != null && !weather.isEmpty()) {
+            Chart chart = new Chart();
+            Configuration configuration = chart.getConfiguration();
+
+            Axis xAxis = configuration.getxAxis();
+            xAxis.setTitle(new AxisTitle("Time"));
+
+            Axis yAxis = configuration.getyAxis();
+            yAxis.setTitle(new AxisTitle("Temperature"));
+
+            DataSeries dataSeries = new DataSeries();
+            dataSeries.setName("Temperature");
+            for (WeatherDTO weatherData : weather) {
+                DataSeriesItem item = new DataSeriesItem(weatherData.getTime(), weatherData.getTemperature());
+                dataSeries.add(item);
+            }
+
+            PlotOptionsLine plotOptions = new PlotOptionsLine();
+            plotOptions.setMarker(new Marker(true));
+            plotOptions.getMarker().setSymbol(MarkerSymbolEnum.CIRCLE);
+            configuration.setPlotOptions(plotOptions);
+
+            Tooltip tooltip = new Tooltip();
+            tooltip.setValueSuffix(" °C");
+            configuration.setTooltip(tooltip);
+
+            configuration.setSeries(dataSeries);
+
+            layout.add(chart);
+        } else {
+            layout.add(new Label("No weather information"));
         }
     }
 
